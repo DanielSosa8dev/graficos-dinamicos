@@ -1,67 +1,71 @@
+// server.js
 const express = require("express");
 const cors = require("cors");
 const helmet = require("helmet");
 const path = require("path");
+const mongoose = require("mongoose");
+
+// Rutas
+const stackRoutes = require("./routes/stackRoutes");
+const authRoutes = require("./routes/authRoutes");
 
 const app = express();
 const PORT = 5000;
 
-// Middleware de seguridad
+// 1. Conexión a MongoDB (StackDB)
+mongoose.connect("mongodb://localhost:27017/StackDB", {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+})
+.then(() => console.log("Conectado a la base de datos StackDB"))
+.catch((err) => console.error("Error de conexión a MongoDB:", err));
+
+// 2. Configuración de Helmet con CSP
 app.use(helmet({
-    contentSecurityPolicy: {
-        directives: {
-            defaultSrc: ["'self'"],
-            imgSrc: ["'self'", "http://localhost:5000"],
-            scriptSrc: ["'self'", "'unsafe-inline'"],
-            styleSrc: ["'self'", "'unsafe-inline'"]
-        }
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      imgSrc: ["'self'", "http://localhost:5000"],
+      scriptSrc: ["'self'", "'unsafe-inline'"],
+      styleSrc: ["'self'", "'unsafe-inline'"]
     }
+  }
 }));
 
-// Habilitar CORS
+// 3. Habilitar CORS y JSON
 app.use(cors());
-
-// Middleware para procesar JSON
 app.use(express.json());
 
-// Servir archivos estáticos (incluyendo favicon)
+// 4. Servir archivos estáticos (favicon, CSS, etc.)
 app.use(express.static(path.join(__dirname, "public")));
 
-// Datos del Stack (Ejemplo en memoria)
-let stack = [];
+// 5. Rutas de autenticación
+app.use("/api/auth", authRoutes);
 
-// Ruta principal
+// 6. Rutas de Stack
+app.use("/api/stack", stackRoutes);
+
+// 7. Ruta principal (index.html)
 app.get("/", (req, res) => {
-    res.sendFile(path.join(__dirname, "views", "index.html"));
+  res.sendFile(path.join(__dirname, "views", "index.html"));
 });
 
-// API para obtener el Stack
-app.get("/api/stack", (req, res) => {
-    res.json({ stack });
+// 8. Rutas para las vistas de Autenticación
+app.get("/login", (req, res) => {
+  res.sendFile(path.join(__dirname, "views", "login.html"));
 });
 
-// API para agregar elementos (Push)
-app.post("/api/stack/push", (req, res) => {
-    const { value } = req.body;
-    if (value) {
-        stack.push(value);
-        res.json({ stack });
-    } else {
-        res.status(400).json({ error: "Debe enviar un valor" });
-    }
+app.get("/register", (req, res) => {
+  res.sendFile(path.join(__dirname, "views", "register.html"));
 });
 
-// API para eliminar elementos (Pop)
-app.post("/api/stack/pop", (req, res) => {
-    if (stack.length > 0) {
-        stack.pop();
-        res.json({ stack });
-    } else {
-        res.status(400).json({ error: "El stack está vacío" });
-    }
+// 9. Ruta para conceptos (stackConcepts.html)
+app.get("/concepts", (req, res) => {
+  res.sendFile(path.join(__dirname, "views", "stackConcepts.html"));
 });
 
-// Iniciar servidor
+// 10. Iniciar servidor
 app.listen(PORT, () => {
-    console.log(`Servidor corriendo en http://localhost:${PORT}`);
+  console.log(`Servidor corriendo en http://localhost:${PORT}`);
 });
+

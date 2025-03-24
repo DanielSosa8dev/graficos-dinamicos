@@ -3,20 +3,260 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stack en Programación</title>
+    <title>Operaciones de Stack</title>
     <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+
+        header {
+            background-color: #333;
+            color: white;
+            padding: 15px 0;
+            text-align: center;
+        }
+
+        nav {
+            background-color: #444;
+            overflow: hidden;
+        }
+
+        nav a {
+            float: left;
+            display: block;
+            color: white;
+            padding: 14px 20px;
+            text-align: center;
+            text-decoration: none;
+        }
+
+        nav a:hover {
+            background-color: #575757;
+        }
+
+        .container {
+            padding: 20px;
+        }
+
+        h1 {
+            font-size: 2em;
+            text-align: center;
+            color: #333;
+        }
+
+        section {
+            background-color: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        section h2 {
+            color: #444;
+        }
+
+        section p {
+            font-size: 1.1em;
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        ul li {
+            margin: 10px 0;
+            font-size: 1.1em;
+        }
+
+        .button-container {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .button-container input, .button-container button {
+            padding: 10px 20px;
+            margin: 5px;
+            font-size: 1em;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .button-container input {
+            width: 200px;
+        }
+
+        .button-container button {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .button-container button:hover {
+            background-color: #45a049;
+        }
+
+        #operation-result {
+            font-weight: bold;
+            color: #333;
+        }
+
+        #stack-container {
+            margin-top: 20px;
+        }
+
+        #stack-container div {
+            background-color: #e7f3fe;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+            text-align: center;
+        }
+    </style>
 </head>
 <body>
-    <h1>Representación de un Stack</h1>
-    <div>
-        <label>Valor: </label>
-        <input type="text" id="stack-value" />
-        <button id="push-btn">Push</button>
-        <button id="pop-btn">Pop</button>
+
+    <header>
+        <h1>Operaciones de Stack</h1>
+    </header>
+
+    <!-- Barra de Navegación -->
+    <nav>
+        <a href="/login">Iniciar Sesión</a>
+        <a href="/register">Registrarse</a>
+        <a href="/concepts">Ver conceptos de Stack</a>
+    </nav>
+
+    <div class="container">
+        <p>Este Stack está conectado a la base de datos <strong>StackDB</strong>.</p>
+
+        <!-- Concepto de Stack en programación -->
+        <section>
+            <h2>¿Qué es un Stack?</h2>
+            <p>Un <strong>Stack</strong> (o Pila) es una estructura de datos abstracta que sigue el principio LIFO (<em>Last In, First Out</em>), lo que significa que el último elemento agregado al Stack es el primero en ser removido.</p>
+            <p>Se puede visualizar como una pila de libros, donde el último libro colocado en la cima es el primero que tomamos.</p>
+        </section>
+
+        <!-- Operaciones de un Stack -->
+        <section>
+            <h2>Operaciones Básicas de un Stack</h2>
+            <ul>
+                <li><strong>Push</strong>: Inserta un elemento en la cima del Stack.</li>
+                <li><strong>Pop</strong>: Elimina el elemento de la cima del Stack.</li>
+                <li><strong>Peek</strong>: Muestra el elemento en la cima del Stack sin eliminarlo.</li>
+                <li><strong>isEmpty</strong>: Verifica si el Stack está vacío.</li>
+            </ul>
+        </section>
+
+        <!-- Código de ejemplo de Stack en C# -->
+        <section>
+            <h2>Código de un Stack en C#</h2>
+            <h3>Clase Stack</h3>
+            <pre>
+<code>
+// Definición de la clase Stack
+using System;
+using System.Collections.Generic;
+
+public class StackExample
+{
+    private List<int> stack = new List<int>();
+
+    // Método Push
+    public void Push(int value)
+    {
+        stack.Add(value); // Agregar valor al tope de la pila
+        Console.WriteLine($"Elemento {value} agregado al Stack.");
+    }
+
+    // Método Pop
+    public int Pop()
+    {
+        if (stack.Count == 0)
+        {
+            Console.WriteLine("El Stack está vacío.");
+            return -1; // Indicamos que no hay elementos para eliminar
+        }
+        int top = stack[stack.Count - 1];
+        stack.RemoveAt(stack.Count - 1); // Eliminar el último elemento
+        Console.WriteLine($"Elemento {top} eliminado del Stack.");
+        return top;
+    }
+
+    // Método Peek
+    public int Peek()
+    {
+        if (stack.Count == 0)
+        {
+            Console.WriteLine("El Stack está vacío.");
+            return -1; // No hay elementos en el Stack
+        }
+        return stack[stack.Count - 1]; // Mostrar el elemento en la cima
+    }
+
+    // Método isEmpty
+    public bool isEmpty()
+    {
+        return stack.Count == 0; // Verificar si el Stack está vacío
+    }
+}
+
+// Ejemplo de uso
+public class Program
+{
+    public static void Main(string[] args)
+    {
+        StackExample stack = new StackExample();
+        
+        stack.Push(10);   // Push 10
+        stack.Push(20);   // Push 20
+        stack.Push(30);   // Push 30
+        
+        Console.WriteLine("Elemento en la cima: " + stack.Peek()); // Peek
+
+        stack.Pop();      // Pop
+        stack.Pop();      // Pop
+        
+        Console.WriteLine("¿Está vacío el Stack? " + stack.isEmpty()); // isEmpty
+    }
+}
+</code>
+            </pre>
+        </section>
+
+        <!-- Controles para cada operación -->
+        <div class="button-container">
+            <label>Valor a insertar: </label>
+            <input type="text" id="stack-value" />
+            <button id="push-btn">Push</button>
+            <button id="pop-btn">Pop</button>
+            <button id="peek-btn">Peek</button>
+            <button id="isEmpty-btn">isEmpty</button>
+        </div>
+
+        <!-- Mostrar el resultado de la operación (por ejemplo, al hacer peek) -->
+        <div style="margin-top: 20px;">
+            <h2>Resultado de la operación:</h2>
+            <div id="operation-result" style="font-weight: bold;"></div>
+        </div>
+
+        <!-- Mostrar el contenido completo del Stack -->
+        <div style="margin-top: 20px;">
+            <h2>Contenido del Stack:</h2>
+            <div id="stack-container"></div>
+        </div>
     </div>
-    <div id="stack-container" style="margin-top: 20px;"></div>
 
     <script>
+        /**
+         * Obtiene el estado actual del Stack y lo muestra en la pantalla.
+         */
         async function updateStackChart() {
             try {
                 const response = await fetch("http://localhost:5000/api/stack");
@@ -25,13 +265,10 @@
                 const stackContainer = document.getElementById("stack-container");
                 stackContainer.innerHTML = "";
 
+                // data.stack debe contener el array con los elementos del Stack
                 data.stack.forEach((element) => {
                     const div = document.createElement("div");
                     div.textContent = element;
-                    div.style.padding = "10px";
-                    div.style.border = "1px solid black";
-                    div.style.margin = "5px";
-                    div.style.backgroundColor = "lightblue";
                     stackContainer.appendChild(div);
                 });
             } catch (error) {
@@ -39,30 +276,95 @@
             }
         }
 
+        /**
+         * Agrega un valor al tope del Stack.
+         */
         async function pushToStack() {
             const value = document.getElementById("stack-value").value;
             if (!value) return;
-            await fetch("http://localhost:5000/api/stack/push", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ value })
-            });
-            updateStackChart();
+            try {
+                const response = await fetch("http://localhost:5000/api/stack/push", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ value })
+                });
+                if (!response.ok) {
+                    console.error("Error al hacer push:", response.statusText);
+                }
+                document.getElementById("stack-value").value = "";
+                updateStackChart();
+                document.getElementById("operation-result").textContent = "Push realizado correctamente.";
+            } catch (error) {
+                console.error("Error al hacer push:", error);
+            }
         }
 
+        /**
+         * Elimina el último elemento agregado (tope del Stack).
+         */
         async function popFromStack() {
-            await fetch("http://localhost:5000/api/stack/pop", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" }
-            });
-            updateStackChart();
+            try {
+                const response = await fetch("http://localhost:5000/api/stack/pop", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" }
+                });
+                const data = await response.json();
+                if (data.error) {
+                    document.getElementById("operation-result").textContent = data.error;
+                } else {
+                    document.getElementById("operation-result").textContent = "Pop realizado correctamente.";
+                }
+                updateStackChart();
+            } catch (error) {
+                console.error("Error al hacer pop:", error);
+            }
+        }
+
+        /**
+         * Consulta el elemento del tope sin eliminarlo.
+         */
+        async function peekStack() {
+            try {
+                // Endpoint: GET /api/stack/peek
+                const response = await fetch("http://localhost:5000/api/stack/peek");
+                const data = await response.json();
+                if (data.error) {
+                    document.getElementById("operation-result").textContent = data.error;
+                } else {
+                    document.getElementById("operation-result").textContent =
+                        "Elemento en el tope: " + data.top;
+                }
+            } catch (error) {
+                console.error("Error al hacer peek:", error);
+            }
+        }
+
+        /**
+         * Verifica si el Stack está vacío.
+         */
+        async function isEmptyStack() {
+            try {
+                // Endpoint: GET /api/stack/isEmpty
+                const response = await fetch("http://localhost:5000/api/stack/isEmpty");
+                const data = await response.json();
+                if (data.isEmpty) {
+                    document.getElementById("operation-result").textContent = "El Stack está vacío.";
+                } else {
+                    document.getElementById("operation-result").textContent = "El Stack NO está vacío.";
+                }
+            } catch (error) {
+                console.error("Error al verificar isEmpty:", error);
+            }
         }
 
         document.addEventListener("DOMContentLoaded", () => {
             document.getElementById("push-btn").addEventListener("click", pushToStack);
             document.getElementById("pop-btn").addEventListener("click", popFromStack);
+            document.getElementById("peek-btn").addEventListener("click", peekStack);
+            document.getElementById("isEmpty-btn").addEventListener("click", isEmptyStack);
             updateStackChart();
         });
     </script>
+
 </body>
 </html>
