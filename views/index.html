@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stack en Programación</title>
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+</head>
+<body>
+    <h1>Representación de un Stack</h1>
+    <div>
+        <label>Valor: </label>
+        <input type="text" id="stack-value" />
+        <button id="push-btn">Push</button>
+        <button id="pop-btn">Pop</button>
+    </div>
+    <div id="stack-container" style="margin-top: 20px;"></div>
+
+    <script>
+        async function updateStackChart() {
+            try {
+                const response = await fetch("http://localhost:5000/api/stack");
+                const data = await response.json();
+
+                const stackContainer = document.getElementById("stack-container");
+                stackContainer.innerHTML = "";
+
+                data.stack.forEach((element) => {
+                    const div = document.createElement("div");
+                    div.textContent = element;
+                    div.style.padding = "10px";
+                    div.style.border = "1px solid black";
+                    div.style.margin = "5px";
+                    div.style.backgroundColor = "lightblue";
+                    stackContainer.appendChild(div);
+                });
+            } catch (error) {
+                console.error("Error al obtener datos del stack:", error);
+            }
+        }
+
+        async function pushToStack() {
+            const value = document.getElementById("stack-value").value;
+            if (!value) return;
+            await fetch("http://localhost:5000/api/stack/push", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ value })
+            });
+            updateStackChart();
+        }
+
+        async function popFromStack() {
+            await fetch("http://localhost:5000/api/stack/pop", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" }
+            });
+            updateStackChart();
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            document.getElementById("push-btn").addEventListener("click", pushToStack);
+            document.getElementById("pop-btn").addEventListener("click", popFromStack);
+            updateStackChart();
+        });
+    </script>
+</body>
+</html>

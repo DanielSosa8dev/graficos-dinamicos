@@ -1,48 +1,67 @@
 const express = require("express");
 const cors = require("cors");
+const helmet = require("helmet");
+const path = require("path");
 
 const app = express();
-const PORT = 3000;
+const PORT = 5000;
 
+// Middleware de seguridad
+app.use(helmet({
+    contentSecurityPolicy: {
+        directives: {
+            defaultSrc: ["'self'"],
+            imgSrc: ["'self'", "http://localhost:5000"],
+            scriptSrc: ["'self'", "'unsafe-inline'"],
+            styleSrc: ["'self'", "'unsafe-inline'"]
+        }
+    }
+}));
+
+// Habilitar CORS
 app.use(cors());
 
-// Función para obtener un tipo de gráfico aleatorio
-function getRandomChartType() {
-    const chartTypes = ["bar", "line", "pie", "doughnut", "radar"];
-    return chartTypes[Math.floor(Math.random() * chartTypes.length)];
-}
+// Middleware para procesar JSON
+app.use(express.json());
 
-// Endpoint que devuelve datos y un tipo de gráfico aleatorio
-app.get("/data", (req, res) => {
-    const chartType = getRandomChartType();
+// Servir archivos estáticos (incluyendo favicon)
+app.use(express.static(path.join(__dirname, "public")));
 
-    const data = {
-        type: chartType,
-        labels: ["Enero", "Febrero", "Marzo", "Abril", "Mayo"],
-        datasets: [
-            {
-                label: "Ventas",
-                data: Array.from({ length: 5 }, () => Math.floor(Math.random() * 100)),
-                backgroundColor: [
-                    "rgba(255, 99, 132, 0.5)",
-                    "rgba(54, 162, 235, 0.5)",
-                    "rgba(255, 206, 86, 0.5)",
-                    "rgba(75, 192, 192, 0.5)",
-                    "rgba(153, 102, 255, 0.5)"
-                ],
-                borderColor: [
-                    "rgba(255, 99, 132, 1)",
-                    "rgba(54, 162, 235, 1)",
-                    "rgba(255, 206, 86, 1)",
-                    "rgba(75, 192, 192, 1)",
-                    "rgba(153, 102, 255, 1)"
-                ],
-                borderWidth: 1
-            }
-        ]
-    };
+// Datos del Stack (Ejemplo en memoria)
+let stack = [];
 
-    res.json(data);
+// Ruta principal
+app.get("/", (req, res) => {
+    res.sendFile(path.join(__dirname, "views", "index.html"));
 });
 
-app.listen(PORT, () => console.log(`Servidor corriendo en http://localhost:${PORT}`));
+// API para obtener el Stack
+app.get("/api/stack", (req, res) => {
+    res.json({ stack });
+});
+
+// API para agregar elementos (Push)
+app.post("/api/stack/push", (req, res) => {
+    const { value } = req.body;
+    if (value) {
+        stack.push(value);
+        res.json({ stack });
+    } else {
+        res.status(400).json({ error: "Debe enviar un valor" });
+    }
+});
+
+// API para eliminar elementos (Pop)
+app.post("/api/stack/pop", (req, res) => {
+    if (stack.length > 0) {
+        stack.pop();
+        res.json({ stack });
+    } else {
+        res.status(400).json({ error: "El stack está vacío" });
+    }
+});
+
+// Iniciar servidor
+app.listen(PORT, () => {
+    console.log(`Servidor corriendo en http://localhost:${PORT}`);
+});
