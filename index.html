@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gráficos Dinámicos con Node.js</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <h2>Gráfico Dinámico</h2>
+    <canvas id="myChart"></canvas>
+
+    <script>
+        async function fetchData() {
+            const response = await fetch("http://localhost:3000/data");
+            const data = await response.json();
+            return data;
+        }
+
+        async function renderChart() {
+            const ctx = document.getElementById("myChart").getContext("2d");
+            const chartData = await fetchData();
+
+            new Chart(ctx, {
+                type: chartData.type, 
+                data: {
+                    labels: chartData.labels,
+                    datasets: chartData.datasets
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: { beginAtZero: true }
+                    }
+                }
+            });
+        }
+
+        renderChart();
+    </script>
+</body>
+</html>
