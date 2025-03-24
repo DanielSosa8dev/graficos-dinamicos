@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ejercicio</title>
+    <style>
+        /* Estilos básicos */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f9;
+        }
+
+        .question-container {
+            margin-bottom: 20px;
+        }
+
+        .button-container {
+            margin-top: 20px;
+        }
+
+        button {
+            padding: 10px;
+            font-size: 16px;
+            margin: 5px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+        }
+
+        /* Botones de opciones */
+        .option {
+            background-color: #e0e0e0;
+            color: #333;
+            transition: background-color 0.3s ease;
+        }
+
+        .option.selected {
+            background-color: #1e90ff; /* Azul cuando está seleccionado */
+            color: white;
+        }
+
+        .option.correct {
+            background-color: #28a745; /* Verde para correcta */
+            color: white;
+        }
+
+        .option.incorrect {
+            background-color: #dc3545; /* Rojo para incorrecta */
+            color: white;
+        }
+
+        /* Botones de verificación */
+        #checkAnswerButton, #showAnswerButton {
+            background-color: #003366; /* Azul marino */
+            color: white;
+            border-radius: 5px;
+        }
+
+        #response {
+            margin-top: 20px;
+            font-weight: bold;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+    <div class="question-container">
+        <h2 id="question">Cargando pregunta...</h2>
+        <div id="options">
+            <!-- Opciones se llenarán dinámicamente con JavaScript -->
+        </div>
+    </div>
+
+    <div class="button-container">
+        <button id="checkAnswerButton">Verificar respuesta</button>
+        <button id="showAnswerButton">Mostrar respuesta correcta</button>
+    </div>
+
+    <div id="response"></div>
+
+    <script>
+        // Variable global para almacenar el ejercicio actual
+        let currentExercise;
+
+        // Cargar un ejercicio aleatorio desde el servidor
+        fetch('/api/exercise/random')
+            .then(response => response.json())
+            .then(data => {
+                currentExercise = data; // Guardar el ejercicio recibido
+                document.getElementById('question').textContent = currentExercise.pregunta;
+
+                // Agregar las opciones al HTML
+                const optionsContainer = document.getElementById('options');
+                optionsContainer.innerHTML = ''; // Limpiar opciones anteriores
+
+                currentExercise.opciones.forEach(option => {
+                    const button = document.createElement('button');
+                    button.textContent = option;
+                    button.classList.add('option');
+                    optionsContainer.appendChild(button);
+
+                    button.addEventListener('click', () => {
+                        // Marcar la opción seleccionada
+                        optionsContainer.querySelectorAll('button').forEach(btn => btn.classList.remove('selected'));
+                        button.classList.add('selected');
+                    });
+                });
+            })
+            .catch(err => {
+                console.error("Error al cargar el ejercicio:", err);
+                document.getElementById('question').textContent = "No se pudo cargar la pregunta.";
+            });
+
+        // Verificar respuesta seleccionada
+        document.getElementById('checkAnswerButton').addEventListener('click', () => {
+            const selectedOption = document.querySelector('.option.selected');
+            if (selectedOption) {
+                const isCorrect = selectedOption.textContent === currentExercise.respuesta_correcta;
+                
+                if (isCorrect) {
+                    selectedOption.classList.add('correct');  // Cambiar color a verde
+                    document.getElementById('response').textContent = "¡Correcto!";
+                } else {
+                    selectedOption.classList.add('incorrect');  // Cambiar color a rojo
+                    document.getElementById('response').textContent = "Respuesta incorrecta.";
+                }
+            } else {
+                document.getElementById('response').textContent = "Por favor, selecciona una opción primero.";
+            }
+        });
+
+        // Mostrar la respuesta correcta
+        document.getElementById('showAnswerButton').addEventListener('click', () => {
+            const allOptions = document.querySelectorAll('.option');
+            allOptions.forEach(option => {
+                if (option.textContent === currentExercise.respuesta_correcta) {
+                    option.classList.add('correct');
+                }
+            });
+
+            document.getElementById('response').textContent = "La respuesta correcta es: " + currentExercise.respuesta_correcta;
+        });
+    </script>
+</body>
+</html>

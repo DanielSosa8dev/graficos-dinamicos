@@ -1,0 +1,56 @@
+<!-- views/addExercise.html -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agregar Ejercicio</title>
+</head>
+<body>
+    <h1>Agregar Nuevo Ejercicio</h1>
+
+    <form id="add-exercise-form">
+        <label for="question">Pregunta:</label>
+        <input type="text" id="question" required /><br>
+
+        <label for="options">Opciones (separadas por coma):</label>
+        <input type="text" id="options" required /><br>
+
+        <label for="correct-answer">Respuesta Correcta:</label>
+        <input type="text" id="correct-answer" required /><br>
+
+        <button type="submit">Agregar Ejercicio</button>
+    </form>
+
+    <script>
+        document.getElementById("add-exercise-form").addEventListener("submit", async function(event) {
+            event.preventDefault();
+
+            const question = document.getElementById("question").value;
+            const options = document.getElementById("options").value.split(',');
+            const correctAnswer = document.getElementById("correct-answer").value;
+
+            try {
+                const response = await fetch("http://localhost:5000/api/exercise", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        pregunta: question,
+                        opciones: options,
+                        respuesta_correcta: correctAnswer
+                    })
+                });
+
+                if (response.ok) {
+                    alert("Ejercicio agregado correctamente.");
+                    document.getElementById("add-exercise-form").reset();
+                } else {
+                    alert("Error al agregar ejercicio.");
+                }
+            } catch (error) {
+                console.error("Error al agregar ejercicio:", error);
+            }
+        });
+    </script>
+</body>
+</html>
