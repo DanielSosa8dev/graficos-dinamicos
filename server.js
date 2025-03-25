@@ -73,6 +73,11 @@ app.get("/exercises", (req, res) => {
   res.sendFile(path.join(__dirname, "views", "exercises.html"));
 });
 
+// Agregar ruta para servir la página de evaluación
+app.get('/evaluation', (req, res) => {
+  res.sendFile(path.join(__dirname, 'views', 'evaluation.html'));
+});
+
 // 12. Iniciar servidor
 app.listen(PORT, () => {
   console.log(`Servidor corriendo en http://localhost:${PORT}`);

@@ -20,4 +20,15 @@ router.get('/random', async (req, res) => {
   }
 });
 
+// Agregar esta nueva ruta
+router.get('/evaluation', async (req, res) => {
+  try {
+      // Obtener 10 ejercicios aleatorios
+      const exercises = await Exercise.aggregate([{ $sample: { size: 10 } }]);
+      res.json(exercises);
+  } catch (error) {
+      res.status(500).json({ message: 'Error al obtener ejercicios para evaluación', error });
+  }
+});
+
 module.exports = router;
