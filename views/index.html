@@ -75,47 +75,46 @@
             font-size: 1.1em;
         }
 
-        .button-container {
-            margin-top: 20px;
+        /* Estilos para la visualización del stack */
+        #stack-visualization {
             text-align: center;
+            margin: 20px 0;
         }
-
-        .button-container input, .button-container button {
-            padding: 10px 20px;
-            margin: 5px;
-            font-size: 1em;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
+        
+        #stack-canvas {
+            border: 1px solid #333;
+            background-color: #f8f8f8;
+            margin: 10px auto;
+            display: block;
         }
-
-        .button-container input {
-            width: 200px;
+        
+        .canvas-description {
+            margin: 10px 0;
+            font-style: italic;
+            color: #555;
         }
-
-        .button-container button {
+        
+        .canvas-controls {
+            margin: 10px 0;
+        }
+        
+        .canvas-controls button {
+            padding: 8px 15px;
+            margin: 0 5px;
             background-color: #4CAF50;
             color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
         }
-
-        .button-container button:hover {
+        
+        .canvas-controls button:hover {
             background-color: #45a049;
         }
-
-        #operation-result {
-            font-weight: bold;
-            color: #333;
-        }
-
-        #stack-container {
-            margin-top: 20px;
-        }
-
-        #stack-container div {
-            background-color: #e7f3fe;
-            padding: 10px;
-            margin: 5px 0;
-            border-radius: 5px;
+        
+        .canvas-controls input {
+            padding: 8px;
+            width: 60px;
             text-align: center;
         }
     </style>
@@ -130,7 +129,7 @@
     <nav>
         <ul>
             <li><a href="/concepts">Conceptos</a></li>
-            <li><a href="/exercises">Ejercicios</a></li> <!-- Enlace a ejercicios -->
+            <li><a href="/exercises">Ejercicios</a></li>
             <li><a href="/login">Iniciar sesión</a></li>
             <li><a href="/register">Registrarse</a></li>
         </ul>
@@ -144,6 +143,25 @@
             <h2>¿Qué es un Stack?</h2>
             <p>Un <strong>Stack</strong> (o Pila) es una estructura de datos abstracta que sigue el principio LIFO (<em>Last In, First Out</em>), lo que significa que el último elemento agregado al Stack es el primero en ser removido.</p>
             <p>Se puede visualizar como una pila de libros, donde el último libro colocado en la cima es el primero que tomamos.</p>
+        </section>
+
+        <!-- Visualización interactiva del Stack -->
+        <section id="stack-visualization">
+            <h2>Visualización Interactiva del Stack</h2>
+            <p class="canvas-description">A continuación se muestra un ejemplo aleatorio de cómo funciona un stack. También puedes interactuar con él:</p>
+            
+            <canvas id="stack-canvas" width="300" height="400"></canvas>
+            
+            <div class="canvas-controls">
+                <input type="text" id="canvas-stack-value" placeholder="Valor" maxlength="3">
+                <button id="canvas-push-btn">Push</button>
+                <button id="canvas-pop-btn">Pop</button>
+                <button id="canvas-peek-btn">Peek</button>
+                <button id="canvas-clear-btn">Clear</button>
+                <button id="canvas-random-btn">Nuevo Ejemplo</button>
+            </div>
+            
+            <div id="canvas-operation-result" style="font-weight: bold; min-height: 20px;"></div>
         </section>
 
         <!-- Operaciones de un Stack -->
@@ -232,140 +250,221 @@ public class Program
 </code>
             </pre>
         </section>
-
-        <!-- Controles para cada operación -->
-        <div class="button-container">
-            <label>Valor a insertar: </label>
-            <input type="text" id="stack-value" />
-            <button id="push-btn">Push</button>
-            <button id="pop-btn">Pop</button>
-            <button id="peek-btn">Peek</button>
-            <button id="isEmpty-btn">isEmpty</button>
-        </div>
-
-        <!-- Mostrar el resultado de la operación (por ejemplo, al hacer peek) -->
-        <div style="margin-top: 20px;">
-            <h2>Resultado de la operación:</h2>
-            <div id="operation-result" style="font-weight: bold;"></div>
-        </div>
-
-        <!-- Mostrar el contenido completo del Stack -->
-        <div style="margin-top: 20px;">
-            <h2>Contenido del Stack:</h2>
-            <div id="stack-container"></div>
-        </div>
     </div>
 
     <script>
-        /**
-         * Obtiene el estado actual del Stack y lo muestra en la pantalla.
-         */
-        async function updateStackChart() {
-            try {
-                const response = await fetch("http://localhost:5000/api/stack");
-                const data = await response.json();
-
-                const stackContainer = document.getElementById("stack-container");
-                stackContainer.innerHTML = "";
-
-                // data.stack debe contener el array con los elementos del Stack
-                data.stack.forEach((element) => {
-                    const div = document.createElement("div");
-                    div.textContent = element;
-                    stackContainer.appendChild(div);
-                });
-            } catch (error) {
-                console.error("Error al obtener datos del stack:", error);
+        // =============================================
+        // Implementación del Stack visual en el Canvas
+        // =============================================
+        
+        class VisualStack {
+            constructor(canvasId) {
+                this.canvas = document.getElementById(canvasId);
+                this.ctx = this.canvas.getContext('2d');
+                this.stack = [];
+                this.blockHeight = 40;
+                this.blockWidth = 120;
+                this.startX = (this.canvas.width - this.blockWidth) / 2;
+                this.startY = this.canvas.height - 50;
+                this.maxStackSize = 8;
+                
+                this.drawBase();
             }
-        }
-
-        /**
-         * Agrega un valor al tope del Stack.
-         */
-        async function pushToStack() {
-            const value = document.getElementById("stack-value").value;
-            if (!value) return;
-            try {
-                const response = await fetch("http://localhost:5000/api/stack/push", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ value })
-                });
-                if (!response.ok) {
-                    console.error("Error al hacer push:", response.statusText);
+            
+            drawBase() {
+                this.ctx.fillStyle = '#333';
+                this.ctx.fillRect(this.startX - 10, this.startY + 10, this.blockWidth + 20, 10);
+                this.ctx.fillRect(this.startX + this.blockWidth/2 - 5, this.startY - (this.blockHeight * this.maxStackSize) + 20, 10, (this.blockHeight * this.maxStackSize) + 10);
+            }
+            
+            push(value) {
+                if (this.stack.length >= this.maxStackSize) {
+                    return false;
                 }
-                document.getElementById("stack-value").value = "";
-                updateStackChart();
-                document.getElementById("operation-result").textContent = "Push realizado correctamente.";
-            } catch (error) {
-                console.error("Error al hacer push:", error);
+                
+                this.stack.push(value);
+                this.drawStack();
+                return true;
             }
-        }
-
-        /**
-         * Elimina el último elemento agregado (tope del Stack).
-         */
-        async function popFromStack() {
-            try {
-                const response = await fetch("http://localhost:5000/api/stack/pop", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" }
-                });
-                const data = await response.json();
-                if (data.error) {
-                    document.getElementById("operation-result").textContent = data.error;
-                } else {
-                    document.getElementById("operation-result").textContent = "Pop realizado correctamente.";
+            
+            pop() {
+                if (this.stack.length === 0) {
+                    return null;
                 }
-                updateStackChart();
-            } catch (error) {
-                console.error("Error al hacer pop:", error);
+                
+                const value = this.stack.pop();
+                this.drawStack();
+                return value;
             }
-        }
-
-        /**
-         * Consulta el elemento del tope sin eliminarlo.
-         */
-        async function peekStack() {
-            try {
-                // Endpoint: GET /api/stack/peek
-                const response = await fetch("http://localhost:5000/api/stack/peek");
-                const data = await response.json();
-                if (data.error) {
-                    document.getElementById("operation-result").textContent = data.error;
-                } else {
-                    document.getElementById("operation-result").textContent =
-                        "Elemento en el tope: " + data.top;
+            
+            peek() {
+                if (this.stack.length === 0) {
+                    return null;
                 }
-            } catch (error) {
-                console.error("Error al hacer peek:", error);
+                return this.stack[this.stack.length - 1];
             }
-        }
-
-        /**
-         * Verifica si el Stack está vacío.
-         */
-        async function isEmptyStack() {
-            try {
-                // Endpoint: GET /api/stack/isEmpty
-                const response = await fetch("http://localhost:5000/api/stack/isEmpty");
-                const data = await response.json();
-                if (data.isEmpty) {
-                    document.getElementById("operation-result").textContent = "El Stack está vacío.";
-                } else {
-                    document.getElementById("operation-result").textContent = "El Stack NO está vacío.";
+            
+            isEmpty() {
+                return this.stack.length === 0;
+            }
+            
+            clear() {
+                this.stack = [];
+                this.drawStack();
+            }
+            
+            drawStack() {
+                // Limpiar canvas
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                // Redibujar la base
+                this.drawBase();
+                
+                // Dibujar cada elemento del stack
+                for (let i = 0; i < this.stack.length; i++) {
+                    const yPos = this.startY - (i * this.blockHeight);
+                    
+                    // Dibujar bloque
+                    this.ctx.fillStyle = this.getColorForPosition(i);
+                    this.ctx.fillRect(this.startX, yPos - this.blockHeight, this.blockWidth, this.blockHeight);
+                    
+                    // Borde del bloque
+                    this.ctx.strokeStyle = '#333';
+                    this.ctx.lineWidth = 2;
+                    this.ctx.strokeRect(this.startX, yPos - this.blockHeight, this.blockWidth, this.blockHeight);
+                    
+                    // Texto del valor
+                    this.ctx.fillStyle = '#000';
+                    this.ctx.font = 'bold 16px Arial';
+                    this.ctx.textAlign = 'center';
+                    this.ctx.textBaseline = 'middle';
+                    this.ctx.fillText(this.stack[i], this.startX + this.blockWidth/2, yPos - this.blockHeight/2);
+                    
+                    // Si es el último elemento (top), resaltarlo
+                    if (i === this.stack.length - 1) {
+                        this.ctx.strokeStyle = '#FF0000';
+                        this.ctx.lineWidth = 3;
+                        this.ctx.strokeRect(this.startX - 3, yPos - this.blockHeight - 3, this.blockWidth + 6, this.blockHeight + 6);
+                    }
                 }
-            } catch (error) {
-                console.error("Error al verificar isEmpty:", error);
+            }
+            
+            getColorForPosition(pos) {
+                const colors = [
+                    '#FFDDC1', '#FFCCB3', '#FFBBA5', '#FFAA97',
+                    '#FF9989', '#FF887B', '#FF776D', '#FF665F'
+                ];
+                return colors[pos % colors.length];
+            }
+            
+            generateRandomExample() {
+                this.clear();
+                const exampleTypes = [
+                    'push', 'push', 'push', 'push', 'push', 
+                    'push_pop', 'push_pop_push', 'multiple_operations'
+                ];
+                
+                const selectedExample = exampleTypes[Math.floor(Math.random() * exampleTypes.length)];
+                const descriptionElement = document.getElementById('canvas-operation-result');
+                
+                switch(selectedExample) {
+                    case 'push':
+                        // Ejemplo simple de push
+                        const pushCount = 3 + Math.floor(Math.random() * 4);
+                        for (let i = 0; i < pushCount; i++) {
+                            this.push(Math.floor(Math.random() * 90 + 10));
+                        }
+                        descriptionElement.textContent = `Ejemplo: Se realizaron ${pushCount} operaciones PUSH consecutivas.`;
+                        break;
+                        
+                    case 'push_pop':
+                        // Ejemplo de push seguido de pop
+                        const pushPopCount = 2 + Math.floor(Math.random() * 3);
+                        for (let i = 0; i < pushPopCount; i++) {
+                            this.push(Math.floor(Math.random() * 90 + 10));
+                        }
+                        this.pop();
+                        descriptionElement.textContent = `Ejemplo: Se realizaron ${pushPopCount} PUSH y luego un POP.`;
+                        break;
+                        
+                    case 'push_pop_push':
+                        // Ejemplo de push, pop y push
+                        this.push(Math.floor(Math.random() * 90 + 10));
+                        this.push(Math.floor(Math.random() * 90 + 10));
+                        const poppedValue = this.pop();
+                        this.push(Math.floor(Math.random() * 90 + 10));
+                        descriptionElement.textContent = `Ejemplo: PUSH, PUSH, POP (${poppedValue}), PUSH.`;
+                        break;
+                        
+                    case 'multiple_operations':
+                        // Ejemplo con múltiples operaciones
+                        const operations = [];
+                        const opCount = 4 + Math.floor(Math.random() * 3);
+                        
+                        for (let i = 0; i < opCount; i++) {
+                            if (Math.random() > 0.3 || this.stack.length === 0) {
+                                const val = Math.floor(Math.random() * 90 + 10);
+                                this.push(val);
+                                operations.push(`PUSH(${val})`);
+                            } else {
+                                const val = this.pop();
+                                operations.push(`POP(${val})`);
+                            }
+                        }
+                        
+                        descriptionElement.textContent = `Ejemplo: Operaciones: ${operations.join(', ')}.`;
+                        break;
+                }
             }
         }
 
+        // Inicializar el stack visual cuando el DOM esté listo
         document.addEventListener("DOMContentLoaded", () => {
-            document.getElementById("push-btn").addEventListener("click", pushToStack);
-            document.getElementById("pop-btn").addEventListener("click", popFromStack);
-            document.getElementById("peek-btn").addEventListener("click", peekStack);
-            document.getElementById("isEmpty-btn").addEventListener("click", isEmptyStack);
-            updateStackChart();
+            // Inicializar y configurar el stack visual con ejemplo aleatorio
+            const visualStack = new VisualStack('stack-canvas');
+            visualStack.generateRandomExample();
+            
+            // Event listeners para los controles del canvas
+            document.getElementById('canvas-push-btn').addEventListener('click', () => {
+                const value = document.getElementById('canvas-stack-value').value;
+                if (value) {
+                    if (visualStack.push(value)) {
+                        document.getElementById('canvas-operation-result').textContent = `Valor "${value}" agregado al stack.`;
+                        document.getElementById('canvas-stack-value').value = '';
+                    } else {
+                        document.getElementById('canvas-operation-result').textContent = '¡Stack lleno! No se pueden agregar más elementos.';
+                    }
+                } else {
+                    document.getElementById('canvas-operation-result').textContent = 'Por favor ingresa un valor.';
+                }
+            });
+            
+            document.getElementById('canvas-pop-btn').addEventListener('click', () => {
+                const value = visualStack.pop();
+                if (value !== null) {
+                    document.getElementById('canvas-operation-result').textContent = `Valor "${value}" removido del stack.`;
+                } else {
+                    document.getElementById('canvas-operation-result').textContent = '¡Stack vacío! No hay elementos para remover.';
+                }
+            });
+            
+            document.getElementById('canvas-peek-btn').addEventListener('click', () => {
+                const value = visualStack.peek();
+                if (value !== null) {
+                    document.getElementById('canvas-operation-result').textContent = `Valor en el tope: "${value}".`;
+                } else {
+                    document.getElementById('canvas-operation-result').textContent = '¡Stack vacío! No hay elementos para ver.';
+                }
+            });
+            
+            document.getElementById('canvas-clear-btn').addEventListener('click', () => {
+                visualStack.clear();
+                document.getElementById('canvas-operation-result').textContent = 'Stack vaciado.';
+            });
+            
+            document.getElementById('canvas-random-btn').addEventListener('click', () => {
+                visualStack.generateRandomExample();
+            });
         });
     </script>
 
