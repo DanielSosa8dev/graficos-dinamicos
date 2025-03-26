@@ -342,52 +342,74 @@
             <h2>Implementación en C#</h2>
             <p>Aquí tienes una implementación completa de un Stack en C#:</p>
             <pre>
-<code>// Definición de la clase Stack genérica
-public class Stack&lt;T&gt; {
-    private List&lt;T&gt; elements = new List&lt;T&gt;();
-    
-    // Agrega un elemento al tope del stack
-    public void Push(T item) {
-        elements.Add(item);
+<code>
+    // Definición de la clase Stack
+using System;
+using System.Collections.Generic;
+
+public class StackExample
+{
+    private List<int> stack = new List<int>();
+
+    // Método Push
+    public void Push(int value)
+    {
+        stack.Add(value); // Agregar valor al tope de la pila
+        Console.WriteLine($"Elemento {value} agregado al Stack.");
     }
-    
-    // Remueve y devuelve el elemento del tope
-    public T Pop() {
-        if (IsEmpty())
-            throw new InvalidOperationException("Stack vacío");
-            
-        var item = elements[^1]; // Índice desde el final
-        elements.RemoveAt(elements.Count - 1);
-        return item;
+
+    // Método Pop
+    public int Pop()
+    {
+        if (stack.Count == 0)
+        {
+            Console.WriteLine("El Stack está vacío.");
+            return -1; // Indicamos que no hay elementos para eliminar
+        }
+        int top = stack[stack.Count - 1];
+        stack.RemoveAt(stack.Count - 1); // Eliminar el último elemento
+        Console.WriteLine($"Elemento {top} eliminado del Stack.");
+        return top;
     }
-    
-    // Observa el elemento del tope sin removerlo
-    public T Peek() {
-        if (IsEmpty())
-            throw new InvalidOperationException("Stack vacío");
-            
-        return elements[^1];
+
+    // Método Peek
+    public int Peek()
+    {
+        if (stack.Count == 0)
+        {
+            Console.WriteLine("El Stack está vacío.");
+            return -1; // No hay elementos en el Stack
+        }
+        return stack[stack.Count - 1]; // Mostrar el elemento en la cima
     }
-    
-    // Verifica si el stack está vacío
-    public bool IsEmpty() => elements.Count == 0;
-    
-    // Devuelve la cantidad de elementos
-    public int Size() => elements.Count;
-    
-    // Vacía el stack
-    public void Clear() => elements.Clear();
+
+    // Método isEmpty
+    public bool isEmpty()
+    {
+        return stack.Count == 0; // Verificar si el Stack está vacío
+    }
 }
 
 // Ejemplo de uso
-var stack = new Stack&lt;int&gt;();
-stack.Push(10);  // Stack: [10]
-stack.Push(20);  // Stack: [10, 20]
-stack.Push(30);  // Stack: [10, 20, 30]
+public class Program
+{
+    public static void Main(string[] args)
+    {
+        StackExample stack = new StackExample();
+        
+        stack.Push(10);   // Push 10
+        stack.Push(20);   // Push 20
+        stack.Push(30);   // Push 30
+        
+        Console.WriteLine("Elemento en la cima: " + stack.Peek()); // Peek
 
-Console.WriteLine(stack.Peek());  // Muestra 30
-Console.WriteLine(stack.Pop());   // Remueve 30
-Console.WriteLine(stack.Size());  // Muestra 2</code>
+        stack.Pop();      // Pop
+        stack.Pop();      // Pop
+        
+        Console.WriteLine("¿Está vacío el Stack? " + stack.isEmpty()); // isEmpty
+    }
+}
+</code>
             </pre>
         </section>
     </div>
