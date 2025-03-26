@@ -434,6 +434,75 @@
             }
         }
         
+        // Modificación en el script de evaluation.html
+// Después de la función showResults(), agregar:
+async function saveResults() {
+    // Preparar datos para enviar
+    const resultsToSave = {
+        totalQuestions: questions.length,
+        correctAnswers: score,
+        questions: questions.map((question, index) => ({
+            questionId: question._id, // Asumo que cada pregunta tiene un ID único
+            question: question.pregunta,
+            userAnswer: userAnswers[index],
+            correctAnswer: question.respuesta_correcta,
+            isCorrect: userAnswers[index] === question.respuesta_correcta
+        }))
+    };
+
+    try {
+        // Obtener token del localStorage
+        const token = localStorage.getItem('token');
+        
+        if (!token) {
+            console.error('No hay token de autenticación');
+            return;
+        }
+
+        const response = await fetch('/api/score/save', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(resultsToSave)
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            console.log('Resultados guardados:', data);
+        } else {
+            console.error('Error al guardar resultados:', data);
+        }
+    } catch (error) {
+        console.error('Error en la solicitud:', error);
+    }
+}
+
+// Modificar la función showResults para llamar a saveResults
+function showResults() {
+    quizContent.style.display = 'none';
+    resultsContainer.style.display = 'block';
+    
+    finalScoreElement.textContent = `${score}/${questions.length}`;
+    
+    // Mensaje según el puntaje
+    if (score === questions.length) {
+        resultMessageElement.textContent = "¡Excelente! Dominas completamente los conceptos de Stack.";
+    } else if (score >= questions.length * 0.7) {
+        resultMessageElement.textContent = "¡Buen trabajo! Tienes un buen entendimiento de los Stacks.";
+    } else if (score >= questions.length * 0.5) {
+        resultMessageElement.textContent = "No está mal, pero podrías repasar algunos conceptos de Stack.";
+    } else {
+        resultMessageElement.textContent = "Sería bueno que repases los conceptos básicos de Stack antes de continuar.";
+    }
+
+    // Guardar resultados
+    saveResults();
+}
+
+
         // Reiniciar la evaluación
         function restartQuiz() {
             currentQuestionIndex = 0;

@@ -1,40 +1,24 @@
-// middlewares/authMiddleware.js
-const jwt = require("jsonwebtoken");
+// middleware/auth.js
+const jwt = require('jsonwebtoken');
 
-exports.verifyToken = (req, res, next) => {
-  // Obtener token de cookies, headers o query params
-  const token = req.cookies.token || req.headers['authorization']?.split(' ')[1] || req.query.token;
-  
-  if (!token) {
-    return res.status(401).json({ error: "Acceso no autorizado. Por favor inicie sesión." });
-  }
+const JWT_SECRET = 'your_jwt_secret_key_here';
 
-  try {
-    const decoded = jwt.verify(token, process.env.SECRET_KEY);
-    req.userId = decoded.id;
-    next();
-  } catch (error) {
-    console.error("Error al verificar token:", error);
-    
-    if (error.name === 'TokenExpiredError') {
-      return res.status(401).json({ error: "Sesión expirada. Por favor inicie sesión nuevamente." });
+module.exports = (req, res, next) => {
+    // Obtener el token del header
+    const token = req.header('Authorization')?.replace('Bearer ', '');
+
+    if (!token) {
+        return res.status(401).json({ error: 'No hay token, autorización denegada' });
     }
-    
-    return res.status(401).json({ error: "Token inválido" });
-  }
-};
 
-// Middleware para redirigir usuarios autenticados
-exports.redirectIfAuthenticated = (req, res, next) => {
-  const token = req.cookies.token;
-  
-  if (token) {
     try {
-      jwt.verify(token, process.env.SECRET_KEY);
-      return res.redirect('/');
+        // Verificar el token
+        const decoded = jwt.verify(token, JWT_SECRET);
+        
+        // Añadir usuario al request
+        req.user = decoded;
+        next();
     } catch (error) {
-      // Token inválido, continuar
+        res.status(401).json({ error: 'El token no es válido' });
     }
-  }
-  next();
 };
